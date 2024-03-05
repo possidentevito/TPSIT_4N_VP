@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>La Torre di Hanoi</title>
+    <!-- Collegamento al foglio di stile Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <!-- Stile personalizzato per i dischi e per il body -->
+    <style>
+        body {
+            background-color: purple;
+        }
+        .disk {
+            height: 30px;
+            background-color: red;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <!-- Intestazione -->
+    <center><h1>La Torre di Hanoi</h1></center>
+</header>
+<main>
+    <!-- Corpo -->
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <!-- Descrizione del gioco -->
+                <h3 style="color: white;">La Torre di Hanoi è un gioco matematico...</h3>
+            </div>
+            <!-- Tre pali dove verranno posizionati i dischi -->
+            <div id="palo1" class="col-4">
+            </div>
+            <div id="palo2" class="col-4">
+            </div>
+            <div id="palo3" class="col-4">
+            </div>
+        </div>
+        <div class="row" style="margin-top:20px;text-align:center;">
+            <!-- Pulsanti per selezionare i dischi da prendere -->
+            <div class="col-4">
+                <button id="btn1" onclick="click1()" class="btn btn-primary">Prendi</button>
+            </div>
+            <div class="col-4">
+                <button id="btn2" onclick="click2()" class="btn btn-primary">Prendi</button>
+            </div>
+            <div class="col-4">
+                <button id="btn3" onclick="click3()" class="btn btn-primary">Prendi</button>
+            </div>
+        </div>
+        <!-- Area dove verrà mostrato il disco selezionato -->
+        <div class="row">
+            <div class="col-4">
+            </div>
+            <div id="myHand" class="col-4">
+            </div>
+            <div class="col-4">
+            </div>
+        </div>
+    </div>
+</main>
+<footer>
+    <!-- Pedice -->
+    <center><p class="footer;" style="color: white;">&copy; Prof.Vito Possidente</p></center>
+    <!-- Visualizzazione del timer -->
+    <div id="timer" class="text-center" style="margin-bottom: 20px;"></div>
+    <!-- Pulsanti per avviare e fermare il timer -->
+    <center> <div>
+		<button id="startTimerBtn" class="btn btn-success" onclick="startTimer()">Inizio Timer</button> 
+		<button id="stopTimerBtn" class="btn btn-danger" onclick="stopTimer()" disabled>Stop Timer</button>
+	</div>
+	<!-- Collegamento al file JavaScript di Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+</footer>
+<script>
+    // Array che rappresenta lo stato dei dischi sui pali
+    var palo1 = [1, 2, 3, 4];
+    var palo2 = [];
+    var palo3 = [];
+    // Variabile che tiene traccia del disco selezionato
+    var hand = 0;
+    // Variabili per il timer
+    var timerInterval;
+    var seconds = 0;
+
+    // Funzione per disegnare un disco con una data dimensione
+    function drawDisk(dimension) {
+        let color = "#FFFF00";
+        if (dimension == 1) {
+            color = "#FF0000";
+        } else if (dimension == 2) {
+            color = "#00FF00 ";
+        } else if (dimension == 3) {
+            color = "#0000FF ";
+        }
+        return "<div class='disk' style='background-color: " + color + ";width:" + dimension * 10 + "%;'></div>";
+    }
+
+    // Funzione per ottenere l'array che rappresenta il palo dato il numero del palo
+    function getPalo(num) {
+        if (num == 1) {
+            return palo1;
+        } else if (num == 2) {
+            return palo2;
+        } else {
+            return palo3;
+        }
+    }
+
+    // Funzione per disegnare i dischi su un palo specificato
+    function drawPalo(num) {
+        let divPalo = document.getElementById("palo" + num);
+        let palo = getPalo(num);
+        divPalo.innerHTML = ""; // Cancella i dischi esistenti prima di disegnare
+        for (i = 0; i < palo.length; i++) {
+            divPalo.innerHTML += drawDisk(palo[i]);
+        }
+    }
+
+    // Funzione per disegnare tutti i pali
+    function drawAll() {
+        drawPalo(1);
+        drawPalo(2);
+        drawPalo(3);
+        checkButtons();
+    }
+
+    // Funzione per controllare lo stato dei pulsanti
+    function checkButtons() {
+        checkButton(1);
+        checkButton(2);
+        checkButton(3);
+    }
+
+    // Funzione per controllare lo stato di un singolo pulsante
+    function checkButton(n) {
+        let btn = document.getElementById("btn" + n);
+        let palo = getPalo(n);
+        if (hand == 0) {
+            // Nessun disco selezionato
+            btn.disabled = palo.length == 0;
+            btn.innerText = "Prendi";
+        } else {
+            // Disco selezionato
+            btn.disabled = palo.length > 0 && hand > palo[0];
+            btn.innerText = "Inserisci";
+        }
+    }
+
+    // Funzioni per gestire il click su ciascun pulsante
+    function click1() {
+        clickHandler(1);
+    }
+
+    function click2() {
+        clickHandler(2);
+    }
+
+    function click3() {
+        clickHandler(3);
+    }
+
+    // Funzione per gestire il click su un pulsante
+    function clickHandler(n) {
+        let palo = getPalo(n);
+        if (hand == 0) {
+            if (palo.length > 0) {
+                hand = palo.shift(); // Rimuove il disco più alto dal palo e lo mette in mano
+                drawAll();
+            }
+        } else {
+            if (palo.length == 0 || hand < palo[0]) {
+                palo.unshift(hand); // Mette il disco dalla mano sul palo
+                hand = 0;
+                drawAll();
+            }
+        }
+    }
+
+    // Funzione per avviare il timer
+    function startTimer() {
+        seconds = 0;
+        timerInterval = setInterval(updateTimer, 1000);
+        document.getElementById("startTimerBtn").disabled = true;
+        document.getElementById("stopTimerBtn").disabled = false;
+    }
+
+    // Funzione per fermare il timer
+    function stopTimer() {
+        clearInterval(timerInterval);
+        document.getElementById("startTimerBtn").disabled = false;
+        document.getElementById("stopTimerBtn").disabled = true;
+    }
+
+    // Funzione per aggiornare il timer
+    function updateTimer() {
+        seconds++;
+        document.getElementById("timer").innerText = "Timer: " + seconds + " secondi";
+    }
+
+    // Disegna tutti i pali all'avvio dello script
+    drawAll();
+</script>
+</body>
+</html>
